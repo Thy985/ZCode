@@ -609,7 +609,7 @@ describe("WorkspaceShellLayout Web remote control mobile layout", () => {
     expect(html).not.toContain('data-panel-visible="true"');
   });
 
-  it("adds mobile stacking classes only for Web remote control mode", async () => {
+  it("adds mobile stacking classes for Web remote control mode (and compact layout)", async () => {
     const html = await renderWorkspaceShell({
       webRemoteControlWorkspaceSwitcher: {
         listWorkspaces: vi.fn(async () => ({ workspaces: [] })),
@@ -867,10 +867,13 @@ describe("WorkspaceShellLayout Web remote control mobile layout", () => {
     vi.unstubAllGlobals();
   });
 
-  it("keeps mobile stacking disabled for the default shell", async () => {
+  it("keeps mobile stacking disabled for the default shell outside compact layout", async () => {
+    // 默认测试环境没有 stub matchMedia，useCompactLayout 返回 false，
+    // 所以非远控 + 非紧凑布局下 mobileStacked 仍为 false。
     const html = await renderWorkspaceShell();
 
     expect(html).toContain('data-mobile-stacked="false"');
+    expect(html).not.toContain("max-md:flex-col");
   });
 
   it("renders the draft workspace header while a new task draft is active", async () => {
@@ -1045,6 +1048,30 @@ it("mounts the same project sidebar in the real narrow mobile branch", async () 
     });
     expect(html).toContain('data-testid="web-remote-mobile-shell"');
     expect(html).toContain('data-testid="workspace-sidebar"');
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it("renders compact-layout stacking markup for the default (non-remote) shell", async () => {
+  // 紧凑布局断点（≤767px）下，默认自托管 shell 也应纵向堆叠：
+  // shell 根带 max-md:flex-col，右侧面板带 data-mobile-stacked="true"。
+  vi.stubGlobal("window", {
+    innerHeight: 844,
+    innerWidth: 390,
+    matchMedia: vi.fn(() => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    })),
+    sessionStorage: { getItem: vi.fn(() => null), removeItem: vi.fn(), setItem: vi.fn() },
+  });
+  try {
+    const html = await renderWorkspaceShell();
+    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain('data-mobile-stacked="true"');
   } finally {
     vi.unstubAllGlobals();
   }
