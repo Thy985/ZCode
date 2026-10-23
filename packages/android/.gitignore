@@ -13,4 +13,6 @@
 /captures
 .externalNativeBuild
 .cxx
+# Kotlin 2.2 会在模块根写 .kotlin/ 会话状态，同属构建产物
+.kotlin
 local.properties

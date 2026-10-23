@@ -1,27 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ZCode</string>
-    <string name="remote_launcher_title">ZCode 远程控制</string>
-    <string name="remote_launcher_description">打开桌面二维码里的远控链接。</string>
-    <string name="remote_url_label">远控链接</string>
-    <string name="remote_url_placeholder">https://zcode.z.ai/remote?sid=...</string>
-    <string name="remote_url_invalid">请输入 ZCode 远控链接。</string>
-    <string name="remote_open_button">打开远程控制</string>
-    <string name="remote_scan_button">扫码打开</string>
-    <string name="remote_scan_title">扫描桌面二维码</string>
-    <string name="remote_scan_hint">将摄像头对准 ZCode 远程控制二维码。</string>
-    <string name="remote_scan_invalid">这个二维码不是 ZCode 远控链接。</string>
-    <string name="remote_scan_permission_denied">需要相机权限才能扫描二维码。</string>
+
+    <string name="remote_launcher_title">ZCode 远控</string>
+    <string name="remote_launcher_description">扫描 ZCode 桌面端给出的配对二维码，或添加你自己用 zcode --web 起的后端。</string>
+    <string name="remote_url_label">配对链接或后端地址</string>
+    <string name="remote_url_placeholder">https://zcode.z.ai/remote?sid=… 或 http://192.168.1.20:3030</string>
+    <string name="remote_url_supporting">可填入 ZCode 配对链接，或你此前已信任的后端地址。</string>
+    <string name="remote_url_invalid">请使用 ZCode 配对链接或已保存的后端。</string>
+    <string name="remote_open_button">打开</string>
+
+    <string name="remote_scan_button">扫描配对二维码</string>
+    <string name="remote_scan_title">扫描桌面端二维码</string>
+    <string name="remote_scan_hint">将相机对准 ZCode 远控二维码。</string>
+    <string name="remote_scan_invalid">这不是 ZCode 远控链接。</string>
+    <string name="remote_scan_permission_denied">需要相机权限才能扫码。</string>
     <string name="remote_scan_camera_failed">无法启动相机。</string>
-    <string name="remote_recent_title">最近打开</string>
-    <string name="remote_recent_clear">清空</string>
-    <string name="remote_screen_title">远程控制</string>
+
+        <string name="remote_endpoint_official_name">ZCode 官方远控</string>
+<string name="remote_endpoints_title">后端列表</string>
+    <string name="remote_endpoint_add">添加后端</string>
+    <string name="remote_endpoint_add_title">添加自建后端</string>
+    <string name="remote_endpoint_edit">编辑</string>
+    <string name="remote_endpoint_edit_title">编辑后端</string>
+    <string name="remote_endpoint_delete">删除</string>
+    <string name="remote_endpoint_save">保存</string>
+    <string name="remote_endpoint_cancel">取消</string>
+    <string name="remote_endpoint_name_label">名称</string>
+    <string name="remote_endpoint_url_label">后端地址</string>
+    <string name="remote_endpoint_url_placeholder">http://192.168.1.20:3030</string>
+    <string name="remote_endpoint_url_invalid">请填写完整的 http(s) 地址。</string>
+    <string name="remote_endpoint_token_label">访问令牌（可选）</string>
+    <string name="remote_endpoint_token_hint">对应 zcode --web 输出的 ZCODE_SERVER_AUTH_TOKEN。只在首屏以 ?token= 提交一次，之后靠会话 Cookie。</string>
+    <string name="remote_endpoint_allow_http">允许明文 HTTP（仅局域网）</string>
+    <string name="remote_endpoint_official_badge">官方</string>
+    <string name="remote_endpoint_official_hint">扫桌面端的配对二维码即可连接；首次会在 App 内登录同一个 Z.ai 账号。</string>
+    <string name="remote_clear_session">退出登录</string>
+    <string name="remote_endpoint_local_badge">自建</string>
+    <string name="remote_endpoint_http_badge">HTTP</string>
+    <string name="remote_endpoint_token_badge">令牌</string>
+
+    <string name="remote_trust_title">信任此后端？</string>
+    <string name="remote_trust_description">该地址不在你的后端列表里。信任后会钉住这个 origin，它页面的脚本将能读取本次会话暴露的内容。</string>
+    <string name="remote_trust_http_warning">明文 HTTP 会让流量和令牌一起裸奔，只在你能控制的网络里这么做。</string>
+    <string name="remote_trust_token_found">链接里带了访问令牌，它会被存进后端配置，而不是留在地址中。</string>
+    <string name="remote_trust_confirm">信任并添加</string>
+    <string name="remote_trust_need_http_confirm">需先勾选允许明文 HTTP。</string>
+
+    <string name="remote_attach_title">为本次任务附加内容</string>
+    <string name="remote_attach_images">相册图片/视频</string>
+    <string name="remote_attach_camera">拍照</string>
+    <string name="remote_attach_files">浏览文件</string>
+
+    <string name="remote_share_copied">分享内容已复制到剪贴板，长按输入框粘贴即可。</string>
+    <string name="remote_share_copy_again">再复制一次</string>
+    <string name="remote_share_dismiss">知道了</string>
+
+    <string name="remote_switch_endpoint">后端</string>
+    <string name="remote_mode_desktop">桌面版式</string>
+    <string name="remote_mode_mobile">移动版式</string>
     <string name="remote_reload_button">重载</string>
     <string name="remote_close_button">关闭</string>
     <string name="remote_retry_button">重试</string>
-    <string name="remote_load_failed_title">远程控制加载失败</string>
-    <string name="remote_keep_alive_title">ZCode 远程控制运行中</string>
-    <string name="remote_keep_alive_text">正在保持本次手机远控会话可恢复。</string>
-    <string name="remote_keep_alive_channel">远程控制</string>
-    <string name="remote_keep_alive_channel_description">ZCode 手机远控会话的连接状态。</string>
+    <string name="remote_load_failed_title">后端加载失败</string>
+    <string name="remote_load_failed_hint">请确认后端进程在运行、手机能访问该地址，且访问令牌正确。</string>
+
+    <string name="remote_keep_alive_title">ZCode 远控进行中</string>
+    <string name="remote_keep_alive_text">保持远控会话就绪，避免被系统回收。</string>
+    <string name="remote_keep_alive_channel">远控会话</string>
+    <string name="remote_keep_alive_channel_description">ZCode 远控会话的连接状态。</string>
 </resources>

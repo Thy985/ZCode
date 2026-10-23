@@ -1,4 +1,4 @@
-package com.example.zcode_mobile.remote
+package ai.zcode.mobile.remote
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,14 +11,20 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.example.zcode_mobile.MainActivity
-import com.example.zcode_mobile.R
+import ai.zcode.mobile.MainActivity
+import ai.zcode.mobile.R
 
+/**
+ * Bugfix: 原实现把远控地址原样塞进 intent extra，令牌会随通知与任务恢复链路外泄。
+ * 现在只带端点 id、名称与脱敏地址，回跳时按 id 还原会话，令牌仍从配置里取。
+ */
 class RemoteControlKeepAliveService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val remoteUrl = intent?.getStringExtra(EXTRA_REMOTE_URL).orEmpty()
+        val endpointId = intent?.getStringExtra(EXTRA_ENDPOINT_ID).orEmpty()
+        val name = intent?.getStringExtra(EXTRA_ENDPOINT_NAME)
+        val displayUrl = intent?.getStringExtra(EXTRA_REMOTE_URL).orEmpty()
         ensureNotificationChannel()
 
         // Bugfix: 纯浏览器后台后 WebView/JS/WebSocket 容易被系统暂停或回收。
@@ -27,8 +33,12 @@ class RemoteControlKeepAliveService : Service() {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_remote_control)
             .setContentTitle(getString(R.string.remote_keep_alive_title))
-            .setContentText(getString(R.string.remote_keep_alive_text))
-            .setContentIntent(createContentIntent(remoteUrl))
+            .setContentText(
+                listOfNotNull(name?.takeIf { it.isNotBlank() }, displayUrl.takeIf { it.isNotBlank() })
+                    .joinToString(" · ")
+                    .ifBlank { getString(R.string.remote_keep_alive_text) },
+            )
+            .setContentIntent(createContentIntent(endpointId))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -72,10 +82,10 @@ class RemoteControlKeepAliveService : Service() {
         manager.createNotificationChannel(channel)
     }
 
-    private fun createContentIntent(remoteUrl: String): PendingIntent {
+    private fun createContentIntent(endpointId: String): PendingIntent {
         val intent = Intent(this, MainActivity::class.java)
-            .setAction(Intent.ACTION_VIEW)
-            .putExtra(EXTRA_REMOTE_URL, remoteUrl)
+            .setAction(ACTION_RESTORE)
+            .putExtra(EXTRA_ENDPOINT_ID, endpointId)
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         return PendingIntent.getActivity(
             this,
@@ -88,11 +98,16 @@ class RemoteControlKeepAliveService : Service() {
     companion object {
         private const val CHANNEL_ID = "zcode_remote_control"
         private const val NOTIFICATION_ID = 1001
-        const val EXTRA_REMOTE_URL = "com.example.zcode_mobile.remote.REMOTE_URL"
+        const val ACTION_RESTORE = "ai.zcode.mobile.action.RESTORE_ENDPOINT"
+        const val EXTRA_ENDPOINT_ID = "ai.zcode.mobile.extra.ENDPOINT_ID"
+        const val EXTRA_ENDPOINT_NAME = "ai.zcode.mobile.extra.ENDPOINT_NAME"
+        const val EXTRA_REMOTE_URL = "ai.zcode.mobile.extra.REMOTE_URL"
 
-        fun start(context: Context, remoteUrl: String) {
+        fun start(context: Context, endpointId: String, name: String, displayUrl: String) {
             val intent = Intent(context, RemoteControlKeepAliveService::class.java)
-                .putExtra(EXTRA_REMOTE_URL, remoteUrl)
+                .putExtra(EXTRA_ENDPOINT_ID, endpointId)
+                .putExtra(EXTRA_ENDPOINT_NAME, name)
+                .putExtra(EXTRA_REMOTE_URL, displayUrl)
             ContextCompat.startForegroundService(context, intent)
         }
 
