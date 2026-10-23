@@ -93,6 +93,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { getPathLeaf, toFileUrl } from "@/lib/path.js";
 import { shouldOpenAssistantHtmlInBrowser } from "@/lib/assistantPreviewCards.js";
+import { useCompactLayout } from "@/lib/useCompactLayout.js";
 import { setWorkspaceSidebarResizeActive } from "@/lib/workspaceSidebarResizeState.js";
 import { buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
 import {
@@ -436,6 +437,9 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
   const tabStoreApi = useTabStoreApi();
   const isLinuxDesktop = Boolean(isDesktop && !isMacDesktop && !isWindowsDesktop);
   const isWebRemoteControlShell = Boolean(webRemoteControlWorkspaceSwitcher);
+  // 紧凑布局断点（≤767px）：自托管桌面工作区在手机视口下需要与远控模式共享同一套
+  // 纵向堆叠样式。hook 内部复用 mobileTextInput 的 matchMedia 常量，无 DOM 环境返回 false。
+  const isCompactLayout = useCompactLayout();
   // Windows/Linux 原先遗漏外层留白，导致独立面板贴住窗口边缘；桌面统一使用 4px 间距。
   const hasDesktopPanelInset = isMacDesktop || isWindowsDesktop || isLinuxDesktop;
   const usesInlineWindowControls = Boolean(isWindowsDesktop || isLinuxDesktop);
@@ -1901,7 +1905,11 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
       onBrowserPageMetadataChange={handleBrowserPageMetadataChange}
       onSelectGitSource={setGitSelectedSourceId}
       mobileOverlay={options.mobileOverlay}
-      mobileStacked={isWebRemoteControlShell}
+      // 修复原因：原来只有远控模式才在手机断点把右侧面板改为纵向堆叠。
+      // 自托管桌面工作区在紧凑布局下同样需要堆叠，否则 browser/git 面板会挤压内容区。
+      // mobileStacked 在 AnimatedSidePanePanel 内仅驱动 max-md: 前缀的 CSS 类，
+      // 桌面断点不受影响。
+      mobileStacked={isWebRemoteControlShell || isCompactLayout}
     />
   );
   const sidePanePanel = renderSidePanePanel();
@@ -2256,7 +2264,10 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
           // 修复原因：窗口原生 resize 时，外层 react-resizable-panels 会把每一帧
           // 都写进 layout store，连带侧栏 tooltip/menu 子树反复 commit。这里改成
           // CSS 变量驱动的专用 split，普通窗口 resize 只走浏览器布局，不触发 React 状态。
-          isWebRemoteControlShell && "max-md:flex-col",
+          // 修复原因：自托管桌面工作区在手机视口下仍保持横向分栏，264px 侧栏 + 320px 内容区
+          // 会挤压甚至溢出视口。原来只有远控模式才切纵向堆叠，现在紧凑布局（≤767px）
+          // 下统一改为 flex-col，让侧栏、内容、右侧面板真正单列重组。
+          (isWebRemoteControlShell || isCompactLayout) && "max-md:flex-col",
         )}
       >
         <div
@@ -2279,6 +2290,17 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
                   ? "max-md:!h-[var(--web-remote-navigation-height)] max-md:!min-h-0 max-md:!w-full max-md:!max-w-none max-md:!flex-none max-md:!basis-auto max-md:border-b max-md:border-border max-md:bg-sidebar"
                   : "max-md:!h-0 max-md:!min-h-0 max-md:!w-full max-md:!max-w-none max-md:!flex-none max-md:!basis-0 max-md:!border-b-0",
               ),
+            // 修复原因：自托管桌面工作区在紧凑布局下侧栏仍保持 264px 固定宽度与 max-w-[50%]，
+            // 配合 shell 的 max-md:flex-col 会让侧栏变成窄条。这里在紧凑布局下把侧栏改为全宽
+            // 堆叠：可见时给一个合理高度，隐藏时塌缩到 0。
+            isCompactLayout &&
+              !isWebRemoteControlShell &&
+              cn(
+                "max-md:!w-full max-md:!max-w-none max-md:!flex-none max-md:!basis-auto",
+                isSidebarPanelVisible
+                  ? "max-md:!h-[min(45dvh,22rem)] max-md:!min-h-0 max-md:border-b max-md:border-border max-md:bg-sidebar"
+                  : "max-md:!h-0 max-md:!min-h-0 max-md:!basis-0 max-md:border-b-0",
+              ),
             isSidebarPanelVisible ? "opacity-100" : "pointer-events-none opacity-0",
           )}
         >
@@ -2288,7 +2310,7 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             ref={sidebarContainerRef}
             className={cn(
               "h-full overflow-hidden select-none",
-              isWebRemoteControlShell && "max-md:min-h-0 max-md:flex-1",
+              (isWebRemoteControlShell || isCompactLayout) && "max-md:min-h-0 max-md:flex-1",
               !renderWebRemoteNavigationPanel && "max-md:hidden",
             )}
             aria-hidden={!isSidebarPanelVisible || !renderWebRemoteNavigationPanel}
@@ -2330,7 +2352,8 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
               "after:pointer-events-none after:absolute after:rounded-full after:bg-foreground-subtlest/50 platform-mac-desktop:after:bg-resize-handle platform-windows-desktop:after:bg-resize-handle platform-linux-desktop:after:bg-resize-handle after:opacity-0 after:transition-opacity after:content-[''] after:inset-y-[var(--workspace-panel-radius)] after:w-0.5",
               "hover:after:opacity-100 data-[separator=hover]:after:opacity-100 data-[separator=active]:after:opacity-100 focus-visible:after:opacity-100 [[data-workspace-sidebar-resizing=true]_&]:after:opacity-100",
               hasDesktopPanelInset && "after:inset-y-[var(--workspace-resize-handle-inset)]",
-              isWebRemoteControlShell && "max-md:hidden",
+              // 修复原因：紧凑布局下主布局已改为纵向堆叠，横向拖拽手柄不再适用。
+              (isWebRemoteControlShell || isCompactLayout) && "max-md:hidden",
             )}
           />
         ) : null}
@@ -2341,7 +2364,7 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             data-sidebar-divider-extension="true"
             className={cn(
               "pointer-events-none absolute h-px w-1 bg-border/50 [left:anchor(--sidebar-task-list-divider_right,-4px)] [top:anchor(--sidebar-task-list-divider_top,-1px)]",
-              isWebRemoteControlShell && "max-md:hidden",
+              (isWebRemoteControlShell || isCompactLayout) && "max-md:hidden",
             )}
           />
         ) : null}
@@ -2352,7 +2375,8 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
           className={cn(
             "flex min-w-[320px] flex-1 flex-col",
             hasDesktopPanelInset ? (isWindowsDesktop ? "pr-1.5 pb-1.5" : "pr-1 pb-1") : "p-0",
-            isWebRemoteControlShell &&
+            // 修复原因：紧凑布局下 shell 已改为纵向堆叠，内容区需要撑满全宽并去掉 320px 最小宽度约束。
+            (isWebRemoteControlShell || isCompactLayout) &&
               "max-md:!w-full max-md:!min-w-0 max-md:!flex-1 max-md:!basis-0",
           )}
         >
@@ -2366,7 +2390,8 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             panelIds={WORKSPACE_BODY_PANEL_IDS}
             className={cn(
               "min-h-0 flex-1",
-              isWebRemoteControlShell && "max-md:!flex-col",
+              // 修复原因：紧凑布局下内容区与右侧面板需要纵向堆叠，不再保持横向分栏。
+              (isWebRemoteControlShell || isCompactLayout) && "max-md:!flex-col",
               // 完整视图：面板外框以 Group 为定位容器铺满整行，对话内容由宿主 fixed 定位。
               // 修复原因：曾用 CSS 把对话列 flex 压成 0，react-resizable-panels 以各 panel offsetWidth
               // 之和作为 group 尺寸，面板从收起展开时两者皆为 0，resize 得到 NaN，面板一直停在收起态。
@@ -2376,10 +2401,13 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
           >
             <ResizablePanel
               id="conversation-column"
-              minSize={isWebRemoteControlShell ? "0px" : "35%"}
+              // 修复原因：紧凑布局下百分比 minSize 会让 react-resizable-panels 在 flex-col
+              // 重组时以 0 尺寸计算 resize，触发 NaN 导致面板卡在收起态。与远控模式一致，
+              // 紧凑布局下把 minSize 降到 0，由 CSS 的 max-md:!flex-1 接管尺寸。
+              minSize={isWebRemoteControlShell || isCompactLayout ? "0px" : "35%"}
               defaultSize={isSidePaneVisible ? "52%" : undefined}
               className={
-                isWebRemoteControlShell
+                isWebRemoteControlShell || isCompactLayout
                   ? "max-md:!w-full max-md:!min-w-0 max-md:!flex-1 max-md:!basis-0"
                   : undefined
               }
@@ -2420,7 +2448,8 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
                                 desktopWindowChromeState?.supportsNativeRoundedCorners ?? null,
                             }),
                         isTerminalVisible && "rounded-b-[var(--workspace-panel-radius)] border-b",
-                        isWebRemoteControlShell &&
+                        // 修复原因：紧凑布局下对话区全宽堆叠，保留桌面圆角和侧边框会在视觉上产生多余间隙。
+                        (isWebRemoteControlShell || isCompactLayout) &&
                           "max-md:rounded-none max-md:border-x-0 max-md:border-b-0",
                         // 完整视图由面板外框或浮窗外框承担边框与圆角，对话 frame 不再叠一层。
                         isFullView && "rounded-none border-0",
