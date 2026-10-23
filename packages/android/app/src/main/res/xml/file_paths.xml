@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 拍照附件落在应用私有缓存，经 FileProvider 以 content:// 交给 WebView，因此 allowFileAccess 保持关闭。 -->
+<paths>
+    <cache-path
+        name="camera_attachments"
+        path="camera/" />
+</paths>

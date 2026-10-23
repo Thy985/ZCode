@@ -1,24 +1,69 @@
 <resources>
     <string name="app_name">ZCode</string>
+
     <string name="remote_launcher_title">ZCode Remote</string>
-    <string name="remote_launcher_description">Open the remote control link from your desktop QR code.</string>
-    <string name="remote_url_label">Remote URL</string>
-    <string name="remote_url_placeholder">https://zcode.z.ai/remote?sid=...</string>
-    <string name="remote_url_invalid">Use a ZCode remote link.</string>
-    <string name="remote_open_button">Open remote control</string>
-    <string name="remote_scan_button">Scan QR code</string>
+    <string name="remote_launcher_description">Scan the pairing QR code from ZCode desktop, or add your own self-hosted zcode --web backend.</string>
+    <string name="remote_url_label">Pairing link or backend URL</string>
+    <string name="remote_url_placeholder">https://zcode.z.ai/remote?sid=… or http://192.168.1.20:3030</string>
+    <string name="remote_url_supporting">Accepts ZCode pairing links and origins you have already trusted.</string>
+    <string name="remote_url_invalid">Use a ZCode pairing link or a saved backend.</string>
+    <string name="remote_open_button">Open</string>
+
+    <string name="remote_scan_button">Scan pairing QR code</string>
     <string name="remote_scan_title">Scan desktop QR code</string>
     <string name="remote_scan_hint">Point the camera at the ZCode remote control QR code.</string>
     <string name="remote_scan_invalid">This QR code is not a ZCode remote link.</string>
     <string name="remote_scan_permission_denied">Camera permission is needed to scan the QR code.</string>
     <string name="remote_scan_camera_failed">Could not start the camera.</string>
-    <string name="remote_recent_title">Recent links</string>
-    <string name="remote_recent_clear">Clear</string>
-    <string name="remote_screen_title">Remote control</string>
+
+        <string name="remote_endpoint_official_name">ZCode official relay</string>
+<string name="remote_endpoints_title">Backends</string>
+    <string name="remote_endpoint_add">Add backend</string>
+    <string name="remote_endpoint_add_title">Add self-hosted backend</string>
+    <string name="remote_endpoint_edit">Edit</string>
+    <string name="remote_endpoint_edit_title">Edit backend</string>
+    <string name="remote_endpoint_delete">Delete</string>
+    <string name="remote_endpoint_save">Save</string>
+    <string name="remote_endpoint_cancel">Cancel</string>
+    <string name="remote_endpoint_name_label">Name</string>
+    <string name="remote_endpoint_url_label">Backend URL</string>
+    <string name="remote_endpoint_url_placeholder">http://192.168.1.20:3030</string>
+    <string name="remote_endpoint_url_invalid">Enter a full http(s) address.</string>
+    <string name="remote_endpoint_token_label">Access token (optional)</string>
+    <string name="remote_endpoint_token_hint">Matches ZCODE_SERVER_AUTH_TOKEN printed by zcode --web. Sent once as ?token= to obtain the session cookie.</string>
+    <string name="remote_endpoint_allow_http">Allow plain HTTP (LAN only)</string>
+    <string name="remote_endpoint_official_badge">Official</string>
+    <string name="remote_endpoint_official_hint">Scan the QR in ZCode desktop to pair. The first run signs in to the same Z.ai account inside this app.</string>
+    <string name="remote_clear_session">Sign out</string>
+    <string name="remote_endpoint_local_badge">Self-hosted</string>
+    <string name="remote_endpoint_http_badge">HTTP</string>
+    <string name="remote_endpoint_token_badge">Token</string>
+
+    <string name="remote_trust_title">Trust this backend?</string>
+    <string name="remote_trust_description">This address is not among your saved backends. Trusting it pins this exact origin, and its pages will be able to read whatever this session exposes.</string>
+    <string name="remote_trust_http_warning">Plain HTTP sends the traffic and the access token unencrypted. Only use it on a network you control.</string>
+    <string name="remote_trust_token_found">An access token was found in this link. It is stored with the backend instead of staying in the address.</string>
+    <string name="remote_trust_confirm">Trust and add</string>
+    <string name="remote_trust_need_http_confirm">Confirm plain HTTP to continue.</string>
+
+    <string name="remote_attach_title">Attach to this task</string>
+    <string name="remote_attach_images">Photos and videos</string>
+    <string name="remote_attach_camera">Take a photo</string>
+    <string name="remote_attach_files">Browse files</string>
+
+    <string name="remote_share_copied">Shared text copied to clipboard. Long-press the input box to paste.</string>
+    <string name="remote_share_copy_again">Copy again</string>
+    <string name="remote_share_dismiss">Dismiss</string>
+
+    <string name="remote_switch_endpoint">Backends</string>
+    <string name="remote_mode_desktop">Desktop layout</string>
+    <string name="remote_mode_mobile">Mobile layout</string>
     <string name="remote_reload_button">Reload</string>
     <string name="remote_close_button">Close</string>
     <string name="remote_retry_button">Retry</string>
-    <string name="remote_load_failed_title">Could not load remote control</string>
+    <string name="remote_load_failed_title">Could not load this backend</string>
+    <string name="remote_load_failed_hint">Check that the backend is running, that this phone can reach its address, and that the access token is correct.</string>
+
     <string name="remote_keep_alive_title">ZCode remote control is active</string>
     <string name="remote_keep_alive_text">Keeping the remote session ready while this phone is in use.</string>
     <string name="remote_keep_alive_channel">Remote control</string>

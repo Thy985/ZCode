@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CameraX 的 ImageProxy.image 是 @ExperimentalGetImage，扫码取帧必须用到它。
+  Kotlin 侧已在调用函数上加 @OptIn，但 androidx 的 experimental lint aspect 只认
+  项目级 opt-in，所以这里显式声明，避免把整条 UnsafeOptInUsageError 检查关掉。
+-->
+<lint>
+    <issue id="UnsafeOptInUsageError">
+        <option name="opt-in" value="androidx.camera.core.ExperimentalGetImage" />
+    </issue>
+</lint>

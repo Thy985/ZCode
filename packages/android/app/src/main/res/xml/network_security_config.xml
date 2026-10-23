@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自建后端的地址由用户自己填，通常是局域网 IP 或 .local 主机名，无法预先枚举域名，
+  所以这里必须整体放开明文 HTTP。真正的边界在 RemoteControlUrlPolicy：
+  未登记的 origin 一律先走一次「信任此后端」确认，确认后按 scheme+host+port 钉住，
+  并且 http 端点还要额外带 trustHttp 标记才允许加载。
+  生产环境建议给后端套一层 HTTPS 反代，然后只填 https 地址。
+-->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <!-- 明文 HTTP 只在用户显式确认 trustHttp 后被策略层放行，这里放开是给局域网自建后端用的 -->
+    <base-config
+        cleartextTrafficPermitted="true"
+        tools:ignore="InsecureBaseConfiguration">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
